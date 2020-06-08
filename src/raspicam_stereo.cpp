@@ -230,7 +230,8 @@ int main(int argc, char **argv) {
 	n.getParam("height", _height);
 
 	image_transport::ImageTransport it(n);
-    _pub_image = it.advertise("image", 1);
+    _pub_image_left = it.advertise("cam_left", 1);
+    _pub_image_right = it.advertise("cam_right", 1);
 
 	CAMERA_INSTANCE camera_instance;
 
@@ -261,15 +262,22 @@ int main(int argc, char **argv) {
 		cv::Mat *image = get_image(camera_instance, _width, _height);
         if(!image)
             continue;
+		cv::Mat image_in = image->clone();
 
 		// Mat h_flippedImg;
 		// Mat flippedImg;
 		// cv::flip(*image,h_flippedImg, 0);
 		// cv::flip(h_flippedImg,flippedImg, 1);
-		
-		sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(std_msgs::Header(), "rgb8", *image).toImageMsg();
-        if (_pub_image.getNumSubscribers() > 0)
-            _pub_image.publish(out_img);
+		// Mat image_left = *image(Rect(0, image.rows/2, image.cols, image.rows/2));
+		Mat image_left = image_in(Rect(0, 0, image_in.cols/2, image_in.rows)); 
+		Mat image_right = image_in(Rect(image_in.cols/2, 0, image_in.cols/2, image_in.rows));
+
+		sensor_msgs::Image::Ptr image_left_out = cv_bridge::CvImage(std_msgs::Header(), "rgb8", image_left).toImageMsg();
+		sensor_msgs::Image::Ptr image_right_out = cv_bridge::CvImage(std_msgs::Header(), "rgb8", image_right).toImageMsg();
+        if (_pub_image_left.getNumSubscribers() > 0)
+            _pub_image_left.publish(image_left_out);
+        if (_pub_image_right.getNumSubscribers() > 0)
+            _pub_image_right.publish(image_right_out);
 
 		ros::spinOnce();
 		loop_rate.sleep();

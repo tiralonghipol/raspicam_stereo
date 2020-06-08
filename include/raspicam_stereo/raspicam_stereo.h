@@ -27,7 +27,8 @@ int getWhitePointThre(cv::Mat whiteRegion);
 void WhitePointMask(cv::Mat Cr, cv::Mat Cb, cv::Mat RL);
 cv::Mat choiceWhitePoint(cv::Mat YCrCb, int mBlocks, int nBlocks);
 
-image_transport::Publisher _pub_image;
+image_transport::Publisher _pub_image_left;
+image_transport::Publisher _pub_image_right;
 int _frame_count = 0;
 int _width;
 int _height;

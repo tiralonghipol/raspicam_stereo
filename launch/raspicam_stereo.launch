@@ -1,0 +1,8 @@
+<launch>
+
+  <node type="raspicam_stereo" pkg="raspicam_stereo" name="raspicam_stereo_node" output="screen">
+
+
+
+  </node>
+</launch>

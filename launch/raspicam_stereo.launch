@@ -1,8 +1,18 @@
 <launch>
 
   <node type="raspicam_stereo" pkg="raspicam_stereo" name="raspicam_stereo_node" output="screen">
-
+    <param name="node_rate_loop" value="30" type="int"/>
+    <param name="width" value="1600" type="int"/>
+    <param name="height" value="600" type="int"/>
 
 
   </node>
 </launch>
+
+<!-- Available formats: 
+mode: 7, 1600x600
+mode: 8, 2560x720
+mode: 9, 3840x1080
+mode: 10, 5184x1944
+mode: 11, 6528x1848
+mode: 12, 6528x2464 -->

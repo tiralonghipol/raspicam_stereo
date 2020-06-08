@@ -223,47 +223,51 @@ Mat dynamicThreWihteBalance(Mat image) {
 int main(int argc, char **argv) {
     
 	ros::init(argc, argv, "raspicam_stereo_node");
-	ros::NodeHandle n;
+	ros::NodeHandle n("raspicam_stereo_node");
+
+	n.getParam("node_rate_loop", _node_rate_loop);
+	n.getParam("width", _width);
+	n.getParam("height", _height);
 
 	image_transport::ImageTransport it(n);
     _pub_image = it.advertise("image", 1);
 
 	CAMERA_INSTANCE camera_instance;
 
-    ROS_INFO("Open camera...");
+    ROS_INFO("Opening camera...");
     int res = arducam_init_camera(&camera_instance);
     if (res) {
         ROS_INFO("init camera status = %d", res);
         return -1;
     }
-
-    ROS_INFO("Setting the resolution...");
-    res = arducam_set_resolution(camera_instance, &width, &height);
+    ROS_INFO("Setting resolution...");
+    res = arducam_set_resolution(camera_instance, &_width, &_height);
     if (res) {
         ROS_INFO("set resolution status = %d", res);
         return -1;
     } else {
-        ROS_INFO("Current resolution is %dx%d", width, height);
+        ROS_INFO("current resolution is %dx%d", _width, _height);
+    }
+    ROS_INFO("Enabling Auto Exposure...");
+    arducam_software_auto_exposure(camera_instance, 1);
+	ROS_INFO("Enable Auto White Balance...");
+    if (arducam_software_auto_white_balance(camera_instance, 1)) {
+        ROS_INFO("Mono camera does not support automatic white balance.");
     }
 
-    ROS_INFO("Enable Software Auto Exposure...");
-    arducam_software_auto_exposure(camera_instance, 1);
-    // ROS_INFO("Enable Software Auto White Balance...");
-    // arducam_software_auto_white_balance(camera_instance, 1);
-
- 	ros::Rate loop_rate(20);
+ 	ros::Rate loop_rate(_node_rate_loop);
 	while (n.ok()) 
 	{
-		cv::Mat *image = get_image(camera_instance, width, height);
+		cv::Mat *image = get_image(camera_instance, _width, _height);
         if(!image)
             continue;
 
-		Mat h_flippedImg;
-		Mat flippedImg;
-		cv::flip(*image,h_flippedImg, 0);
-		cv::flip(h_flippedImg,flippedImg, 1);
+		// Mat h_flippedImg;
+		// Mat flippedImg;
+		// cv::flip(*image,h_flippedImg, 0);
+		// cv::flip(h_flippedImg,flippedImg, 1);
 		
-		sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(std_msgs::Header(), "rgb8", flippedImg).toImageMsg();
+		sensor_msgs::Image::Ptr out_img = cv_bridge::CvImage(std_msgs::Header(), "rgb8", *image).toImageMsg();
         if (_pub_image.getNumSubscribers() > 0)
             _pub_image.publish(out_img);
 
@@ -275,8 +279,8 @@ int main(int argc, char **argv) {
     
     ROS_INFO("Close camera...");
     res = arducam_close_camera(camera_instance);
-    if (res) {
-        ROS_INFO("close camera status = %d", res);
-    }
+    if (res) 
+    	ROS_INFO("close camera status = %d", res);
+    
     return 0;
 }

@@ -18,7 +18,6 @@
 
 #define VCOS_ALIGN_DOWN(p,n) (((ptrdiff_t)(p)) & ~((n)-1))
 #define VCOS_ALIGN_UP(p,n) VCOS_ALIGN_DOWN((ptrdiff_t)(p)+(n)-1,(n))
-#define LOG(fmt, args...) fprintf(stderr, fmt "\n", ##args)
 
 using namespace std;
 using namespace cv;
@@ -30,6 +29,8 @@ cv::Mat choiceWhitePoint(cv::Mat YCrCb, int mBlocks, int nBlocks);
 
 image_transport::Publisher _pub_image;
 int _frame_count = 0;
-int width = 1600;
-int height = 600;
+int _width;
+int _height;
+
+int _node_rate_loop;
 

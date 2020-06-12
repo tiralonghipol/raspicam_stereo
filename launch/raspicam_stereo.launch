@@ -5,6 +5,9 @@
     <param name="width" value="1600" type="int"/>
     <param name="height" value="600" type="int"/>
 
+    <param name="auto_exposure" value="true" type="bool"/>
+    <param name="auto_white_balance" value="true" type="bool"/>
+
 
   </node>
 </launch>

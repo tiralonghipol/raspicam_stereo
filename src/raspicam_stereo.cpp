@@ -26,7 +26,7 @@ cv::Mat *get_image(CAMERA_INSTANCE camera_instance, int width, int height) {
     width = VCOS_ALIGN_UP(width, 32);
     height = VCOS_ALIGN_UP(height, 16);
     cv::Mat *image = new cv::Mat(cv::Size(width,(int)(height * 1.5)), CV_8UC1, buffer->data);
-    cv::cvtColor(*image, *image, cv::COLOR_YUV2RGB_I420);
+    cv::cvtColor(*image, *image, cv::COLOR_YUV2BGR_I420);
     arducam_release_buffer(buffer);
     return image;
 }
@@ -39,12 +39,17 @@ int main(int argc, char **argv) {
 	n.getParam("node_rate_loop", _node_rate_loop);
 	n.getParam("width", _width);
 	n.getParam("height", _height);
+	n.getParam("scale", _scale);
 	n.getParam("auto_exposure", _auto_exposure);
+	n.getParam("exposure_value", _exposure_value);
 	n.getParam("auto_white_balance", _auto_white_balance);
+	n.getParam("auto_wb_compensation", _auto_wb_compensation);
+	n.getParam("red_gain", _red_gain);
+	n.getParam("blue_gain", _blue_gain);
 
 	image_transport::ImageTransport it(n);
-    _pub_image_left = it.advertise("cam_left", 3);
-    _pub_image_right = it.advertise("cam_right", 3);
+    _pub_image_left = it.advertise("image_left", 1);
+    _pub_image_right = it.advertise("image_right", 1);
 
 	CAMERA_INSTANCE camera_instance;
 
@@ -67,13 +72,25 @@ int main(int argc, char **argv) {
 		ROS_INFO("Enabling Auto Exposure...");
 		arducam_software_auto_exposure(camera_instance, 1);
 	}
+	else
+	{
+		if (arducam_set_control(camera_instance, V4L2_CID_EXPOSURE, (int)(_exposure_value*0xFFFF/200.0))) {
+            ROS_INFO("Failed to set exposure, the camera may not support this control.");
+        }
+	}
 	if(_auto_white_balance)
 	{
 		ROS_INFO("Enable Auto White Balance...");
     	if (arducam_software_auto_white_balance(camera_instance, 1)) {
-        	ROS_INFO("Mono camera does not support automatic white balance.");
+        	ROS_INFO("Automatic white balance not supported");
     	}
 	}
+	if(_auto_wb_compensation)
+	{
+		ROS_INFO("Enable Auto White Balance Compensation...");
+    	arducam_manual_set_awb_compensation(_red_gain,_blue_gain);
+	}
+
 	int seq = 0;
  	ros::Rate loop_rate(_node_rate_loop);
 	while (n.ok()) 
@@ -81,17 +98,13 @@ int main(int argc, char **argv) {
 		cv::Mat *image = get_image(camera_instance, _width, _height);
         if(!image)
             continue;
-		cv::Mat image_in = image->clone();
-		
-		// Mat h_flippedImg;
-		// Mat flippedImg;
-		// cv::flip(*image,h_flippedImg, 0);
-		// cv::flip(h_flippedImg,flippedImg, 1);
-		// Mat image_left = *image(Rect(0, image.rows/2, image.cols, image.rows/2));
+		cv::Mat image_clone= image->clone();
+		cv::Mat image_in;
+		resize(image_clone,image_in, cv::Size(image_clone.cols/_scale,image_clone.rows/_scale));
+
 		Mat image_left = image_in(Rect(0, 0, image_in.cols/2, image_in.rows)); 
 		Mat image_right = image_in(Rect(image_in.cols/2, 0, image_in.cols/2, image_in.rows));
 
-		// h = std_msgs::Header();
 		seq = seq+1;
 		sensor_msgs::Image::Ptr image_left_out = cv_bridge::CvImage(std_msgs::Header(), "rgb8", image_left).toImageMsg();
 		sensor_msgs::Image::Ptr image_right_out = cv_bridge::CvImage(std_msgs::Header(), "rgb8", image_right).toImageMsg();

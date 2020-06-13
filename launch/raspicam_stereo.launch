@@ -2,13 +2,15 @@
 
   <node type="raspicam_stereo" pkg="raspicam_stereo" name="raspicam_stereo_node" output="screen">
     <param name="node_rate_loop" value="30" type="int"/>
-    <param name="width" value="1600" type="int"/>
-    <param name="height" value="600" type="int"/>
-
+    <param name="width" value="2560" type="int"/>
+    <param name="height" value="720" type="int"/>
+    <param name="scale" value="2" type="int"/>
     <param name="auto_exposure" value="true" type="bool"/>
+    <param name="exposure_value" value="5" type="int"/>
     <param name="auto_white_balance" value="true" type="bool"/>
-
-
+    <param name="auto_wb_compensation" value="true" type="bool"/>
+    <param name="red_gain" value="10" type="int"/>
+    <param name="blue_gain" value="50" type="int"/>
   </node>
 </launch>
 

@@ -13,10 +13,9 @@
 #include "raspicam_stereo/arducam_mipicamera.h"
 #include "raspicam_stereo/raspicam_stereo.h"
 
-
 cv::Mat *get_image(CAMERA_INSTANCE camera_instance, int width, int height) {
-    IMAGE_FORMAT fmt = {IMAGE_ENCODING_I420, 50};
-    BUFFER *buffer = arducam_capture(camera_instance, &fmt, 3000);
+    IMAGE_FORMAT fmt = {IMAGE_ENCODING_I420, _quality};
+    BUFFER *buffer = arducam_capture(camera_instance, &fmt, 300);
     if (!buffer) 
         return NULL;
     
@@ -39,7 +38,7 @@ int main(int argc, char **argv) {
 	n.getParam("node_rate_loop", _node_rate_loop);
 	n.getParam("width", _width);
 	n.getParam("height", _height);
-	n.getParam("scale", _scale);
+	n.getParam("quality", _quality);
 	n.getParam("auto_exposure", _auto_exposure);
 	n.getParam("exposure_value", _exposure_value);
 	n.getParam("auto_white_balance", _auto_white_balance);
@@ -48,8 +47,7 @@ int main(int argc, char **argv) {
 	n.getParam("blue_gain", _blue_gain);
 
 	image_transport::ImageTransport it(n);
-    _pub_image_left = it.advertise("image_left", 1);
-    _pub_image_right = it.advertise("image_right", 1);
+    _pub_full_image = it.advertise("image_full", 1);
 
 	CAMERA_INSTANCE camera_instance;
 
@@ -98,29 +96,22 @@ int main(int argc, char **argv) {
 		cv::Mat *image = get_image(camera_instance, _width, _height);
         if(!image)
             continue;
-		cv::Mat image_clone= image->clone();
-		cv::Mat image_in;
-		resize(image_clone,image_in, cv::Size(image_clone.cols/_scale,image_clone.rows/_scale));
-
-		Mat image_left = image_in(Rect(0, 0, image_in.cols/2, image_in.rows)); 
-		Mat image_right = image_in(Rect(image_in.cols/2, 0, image_in.cols/2, image_in.rows));
+		cv::Mat image_in = image->clone();
 
 		seq = seq+1;
-		sensor_msgs::Image::Ptr image_left_out = cv_bridge::CvImage(std_msgs::Header(), "rgb8", image_left).toImageMsg();
-		sensor_msgs::Image::Ptr image_right_out = cv_bridge::CvImage(std_msgs::Header(), "rgb8", image_right).toImageMsg();
+		sensor_msgs::Image::Ptr image_out = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image_in).toImageMsg();
+		// sensor_msgs::Image::Ptr image_right_out = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image_right).toImageMsg();
 		
-		image_left_out->header.frame_id = "cam_left";
-		image_left_out->header.stamp = ros::Time::now();
-		image_left_out->header.seq = seq;
+		image_out->header.frame_id = "cam_full";
+		image_out->header.stamp = ros::Time::now();
+		image_out->header.seq = seq;
 
-		image_right_out->header.frame_id = "cam_right";
-		image_right_out->header.stamp = ros::Time::now();
-		image_right_out->header.seq = seq;
+		// image_right_out->header.frame_id = "cam_right";
+		// image_right_out->header.stamp = ros::Time::now();
+		// image_right_out->header.seq = seq;
 
-        if (_pub_image_left.getNumSubscribers() > 0)
-            _pub_image_left.publish(image_left_out);
-        if (_pub_image_right.getNumSubscribers() > 0)
-            _pub_image_right.publish(image_right_out);
+        if (_pub_full_image.getNumSubscribers() > 0)
+            _pub_full_image.publish(image_out);
 
 		ros::spinOnce();
 		loop_rate.sleep();

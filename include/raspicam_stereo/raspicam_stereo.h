@@ -22,11 +22,13 @@
 using namespace std;
 using namespace cv;
 
-image_transport::Publisher _pub_image_left;
-image_transport::Publisher _pub_image_right;
+image_transport::Publisher _pub_full_image;
+
 int _frame_count = 0;
 int _width;
 int _height;
+
+int _quality;
 
 int _node_rate_loop;
 bool _auto_exposure;
@@ -35,6 +37,3 @@ bool _auto_white_balance;
 bool _auto_wb_compensation;
 int _red_gain;
 int _blue_gain;
-int _scale = 2;
-// int _image_width = int(_width* scale);
-// int _image_height = int(_height* scale);

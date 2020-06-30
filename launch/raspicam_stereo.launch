@@ -1,17 +1,20 @@
+
 <launch>
 
-  <node type="raspicam_stereo" pkg="raspicam_stereo" name="raspicam_stereo_node" output="screen">
+  <node type="raspicam_stereo" pkg="raspicam_stereo" name="raspicam_stereo_node" clear_params="true" output="screen">
+   
+    <rosparam command="load" file="$(find raspicam_stereo)/config/params.yaml" />
+<!-- 
     <param name="node_rate_loop" value="30" type="int"/>
     <param name="width" value="1600" type="int"/>
-    <param name="height" value="600" type="int"/>
-    <param name="quality" value="100" type="int"/>
-    <param name="scale" value="2" type="int"/>
-    <param name="auto_exposure" value="false" type="bool"/>
-    <param name="exposure_value" value="8" type="int"/>
+    <param name="height" value="800" type="int"/>
+    <param name="quality" value="50" type="int"/>
+    <param name="auto_exposure" value="true" type="bool"/>
+    <param name="exposure_value" value="15" type="int"/>
     <param name="auto_white_balance" value="false" type="bool"/>
-    <param name="auto_wb_compensation" value="true" type="bool"/>
+    <param name="auto_wb_compensation" value="false" type="bool"/>
     <param name="red_gain" value="10" type="int"/>
-    <param name="blue_gain" value="50" type="int"/>
+    <param name="blue_gain" value="50" type="int"/> -->
   </node>
   
 </launch>

@@ -88,6 +88,29 @@ int main(int argc, char **argv) {
 		ROS_INFO("Enable Auto White Balance Compensation...");
     	arducam_manual_set_awb_compensation(_red_gain,_blue_gain);
 	}
+//  ------------------- registers messup ---------------------
+// binning mode:
+// 2: no-binning, 1: x2-binning,
+// 0: x4-binning, 3: x2-analog (special)
+        ROS_INFO("Enable Binning Mode H_A...");
+        if (arducam_write_sensor_reg(camera_instance, 0x0174, 0x01)) {
+            ROS_WARN("Failed to write sensor register.");
+        }
+        ROS_INFO("Enable Binning Mode H_A...");
+        if (arducam_write_sensor_reg(camera_instance, 0x0175, 0x01)) {
+            ROS_WARN("Failed to write sensor register.");
+        }
+// binning tyoe (H-direction).
+// 0 :average, 1: sum
+        ROS_INFO("Enable BINNING_CAL_MODE_H_A...");
+        if (arducam_write_sensor_reg(camera_instance, 0x0176, 0x00)) {
+            ROS_WARN("Failed to write sensor register.");
+        }
+        ROS_INFO("Enable BINNING_CAL_MODE_V_A...");
+        if (arducam_write_sensor_reg(camera_instance, 0x0177, 0x00)) {
+            ROS_WARN("Failed to write sensor register.");
+        }
+// ---------------------------------------------------
 
 	int seq = 0;
  	ros::Rate loop_rate(_node_rate_loop);

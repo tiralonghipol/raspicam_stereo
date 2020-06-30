@@ -24,7 +24,6 @@ using namespace cv;
 
 image_transport::Publisher _pub_full_image;
 
-// int _frame_count = 0;
 int _width;
 int _height;
 int _quality;
@@ -35,19 +34,5 @@ bool _auto_white_balance;
 bool _auto_wb_compensation;
 int _red_gain;
 int _blue_gain;
-
-// struct cam_params {
-//   int width;
-//   int height;
-//   int quality;
-//   bool auto_exposure;
-//   int exposure_value;
-//   bool auto_wb;
-//   bool auto_wb_compensation;
-//   int red_gain;
-//   int blue_gain;
-//   int binning;
-
-// } ;
-
-// cam_params _camParams;
+int _binning;
+int _binning_type;

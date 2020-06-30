@@ -8,6 +8,8 @@ auto_wb: false
 auto_wb_compensation: false
 red_gain: 10
 blue_gain: 50
+binning: 1
+binning_type: 1
 
 
 # mode: 7, 1600x600

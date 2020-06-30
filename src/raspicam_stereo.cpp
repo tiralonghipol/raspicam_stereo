@@ -45,6 +45,8 @@ int main(int argc, char **argv) {
 	n.getParam("auto_wb_compensation", _auto_wb_compensation);
 	n.getParam("red_gain", _red_gain);
 	n.getParam("blue_gain", _blue_gain);
+	n.getParam("binning", _binning);
+	n.getParam("binning_type", _binning_type);
 
 	image_transport::ImageTransport it(n);
     _pub_full_image = it.advertise("image_full", 1);
@@ -93,21 +95,21 @@ int main(int argc, char **argv) {
 // 2: no-binning, 1: x2-binning,
 // 0: x4-binning, 3: x2-analog (special)
         ROS_INFO("Enable Binning Mode H_A...");
-        if (arducam_write_sensor_reg(camera_instance, 0x0174, 0x01)) {
+        if (arducam_write_sensor_reg(camera_instance, 0x0174, (uint16_t)_binning)) {
             ROS_WARN("Failed to write sensor register.");
         }
         ROS_INFO("Enable Binning Mode H_A...");
-        if (arducam_write_sensor_reg(camera_instance, 0x0175, 0x01)) {
+        if (arducam_write_sensor_reg(camera_instance, 0x0175, (uint16_t)_binning)) {
             ROS_WARN("Failed to write sensor register.");
         }
 // binning tyoe (H-direction).
 // 0 :average, 1: sum
         ROS_INFO("Enable BINNING_CAL_MODE_H_A...");
-        if (arducam_write_sensor_reg(camera_instance, 0x0176, 0x00)) {
+        if (arducam_write_sensor_reg(camera_instance, 0x0176, (uint16_t)_binning_type)) {
             ROS_WARN("Failed to write sensor register.");
         }
         ROS_INFO("Enable BINNING_CAL_MODE_V_A...");
-        if (arducam_write_sensor_reg(camera_instance, 0x0177, 0x00)) {
+        if (arducam_write_sensor_reg(camera_instance, 0x0177, (uint16_t)_binning_type)) {
             ROS_WARN("Failed to write sensor register.");
         }
 // ---------------------------------------------------

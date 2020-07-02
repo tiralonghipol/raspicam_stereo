@@ -24,6 +24,7 @@ cv::Mat *get_image(CAMERA_INSTANCE camera_instance, int width, int height) {
     // width 32 bytes aligned, and height 16 byte aligned.
     width = VCOS_ALIGN_UP(width, 32);
     height = VCOS_ALIGN_UP(height, 16);
+	// Limitation of many YUV formats: it is not defined for "odd" sizes
     cv::Mat *image = new cv::Mat(cv::Size(width,(int)(height * 1.5)), CV_8UC1, buffer->data);
     cv::cvtColor(*image, *image, cv::COLOR_YUV2BGR_I420);
     arducam_release_buffer(buffer);
@@ -53,13 +54,13 @@ int main(int argc, char **argv) {
 
 	CAMERA_INSTANCE camera_instance;
 
-    ROS_INFO("Opening camera...");
+    ROS_INFO("Opening camera");
     int res = arducam_init_camera(&camera_instance);
     if (res) {
         ROS_INFO("init camera status = %d", res);
         return -1;
     }
-    ROS_INFO("Setting resolution...");
+    ROS_INFO("Setting resolution");
     res = arducam_set_resolution(camera_instance, &_width, &_height);
     if (res) {
         ROS_INFO("set resolution status = %d", res);
@@ -69,7 +70,7 @@ int main(int argc, char **argv) {
     }
 	if(_auto_exposure)
 	{
-		ROS_INFO("Enabling Auto Exposure...");
+		ROS_INFO("Setting Auto Exposure");
 		arducam_software_auto_exposure(camera_instance, 1);
 	}
 	else
@@ -80,38 +81,37 @@ int main(int argc, char **argv) {
 	}
 	if(_auto_white_balance)
 	{
-		ROS_INFO("Enable Auto White Balance...");
+		ROS_INFO("Setting Auto White Balance");
     	if (arducam_software_auto_white_balance(camera_instance, 1)) {
         	ROS_INFO("Automatic white balance not supported");
     	}
 	}
 	if(_auto_wb_compensation)
 	{
-		ROS_INFO("Enable Auto White Balance Compensation...");
+		ROS_INFO("Setting Auto White Balance Compensation");
     	arducam_manual_set_awb_compensation(_red_gain,_blue_gain);
 	}
+	
 //  ------------------- registers messup ---------------------
-// binning mode:
-// 2: no-binning, 1: x2-binning,
-// 0: x4-binning, 3: x2-analog (special)
-        ROS_INFO("Enable Binning Mode H_A...");
-        if (arducam_write_sensor_reg(camera_instance, 0x0174, (uint16_t)_binning)) {
-            ROS_WARN("Failed to write sensor register.");
-        }
-        ROS_INFO("Enable Binning Mode H_A...");
-        if (arducam_write_sensor_reg(camera_instance, 0x0175, (uint16_t)_binning)) {
-            ROS_WARN("Failed to write sensor register.");
-        }
-// binning tyoe (H-direction).
-// 0 :average, 1: sum
-        ROS_INFO("Enable BINNING_CAL_MODE_H_A...");
-        if (arducam_write_sensor_reg(camera_instance, 0x0176, (uint16_t)_binning_type)) {
-            ROS_WARN("Failed to write sensor register.");
-        }
-        ROS_INFO("Enable BINNING_CAL_MODE_V_A...");
-        if (arducam_write_sensor_reg(camera_instance, 0x0177, (uint16_t)_binning_type)) {
-            ROS_WARN("Failed to write sensor register.");
-        }
+	uint16_t reg_val = 0;
+// binning mode (Horizontal / Veritcal):
+	ROS_INFO("Setting BINNING_MODE_H_A ");
+	if (arducam_write_sensor_reg(camera_instance, 0x0174, (uint16_t)_binning)) {
+		ROS_WARN("Failed to write sensor register.");
+	}
+	ROS_INFO("Setting BINNING_MODE_V_A ");
+	if (arducam_write_sensor_reg(camera_instance, 0x0175, (uint16_t)_binning)) {
+		ROS_WARN("Failed to write sensor register.");
+	}
+// binning type (Horizontal / Veritcal)
+	ROS_INFO("Setting BINNING_CAL_MODE_H_A");
+	if (arducam_write_sensor_reg(camera_instance, 0x0176, (uint16_t)_binning_type)) {
+		ROS_WARN("Failed to write sensor register.");
+	}
+	ROS_INFO("Setting BINNING_CAL_MODE_V_A");
+	if (arducam_write_sensor_reg(camera_instance, 0x0177, (uint16_t)_binning_type)) {
+		ROS_WARN("Failed to write sensor register.");
+	}
 // ---------------------------------------------------
 
 	int seq = 0;
@@ -144,7 +144,7 @@ int main(int argc, char **argv) {
 		delete image;
     }
     
-    ROS_INFO("Close camera...");
+    ROS_INFO("Close camera");
     res = arducam_close_camera(camera_instance);
     if (res) 
     	ROS_INFO("close camera status = %d", res);

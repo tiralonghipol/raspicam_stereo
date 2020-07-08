@@ -1,11 +1,11 @@
-node_rate_loop: 20
+node_rate_loop: 30
 width: 1600
 height: 600
 quality: 50
-auto_exposure: true
-exposure_value: 15
-auto_wb: false
-auto_wb_compensation: true
+auto_exposure: false
+exposure_value: 1
+auto_wb: true
+auto_wb_compensation: false
 red_gain: 10
 blue_gain: 50
 binning: 2 # 2: no-binning, 1: x2-binning 0: x4-binning 3: x2 analog (special) - not working

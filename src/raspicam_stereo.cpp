@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
 	n.getParam("quality", _quality);
 	n.getParam("auto_exposure", _auto_exposure);
 	n.getParam("exposure_value", _exposure_value);
-	n.getParam("auto_white_balance", _auto_white_balance);
+	n.getParam("auto_wb", _auto_wb);
 	n.getParam("auto_wb_compensation", _auto_wb_compensation);
 	n.getParam("red_gain", _red_gain);
 	n.getParam("blue_gain", _blue_gain);
@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
             ROS_INFO("Failed to set exposure, the camera may not support this control.");
         }
 	}
-	if(_auto_white_balance)
+	if(_auto_wb)
 	{
 		ROS_INFO("Setting Auto White Balance");
     	if (arducam_software_auto_white_balance(camera_instance, 1)) {

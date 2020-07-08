@@ -30,7 +30,7 @@ int _quality;
 int _node_rate_loop;
 bool _auto_exposure;
 int _exposure_value;
-bool _auto_white_balance;
+bool _auto_wb;
 bool _auto_wb_compensation;
 int _red_gain;
 int _blue_gain;
